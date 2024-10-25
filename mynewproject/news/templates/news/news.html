@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shu 3am Ysir / What's Happening</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <!-- Link to the external CSS file -->
+  </head>
+  <body>
+    <div id="loading-screen" class="loading-screen">
+      <div class="spinner-border text-light" role="status"></div>
+      <h2 class="loading-text">Loading News...</h2>
+    </div>
+
+    <div id="main-content" class="container my-4 main-content">
+      <header class="text-white py-3 text-center header-custom">
+        <h1>Shu 3am Ysir</h1>
+      </header>
+
+      <div class="row justify-content-center mt-4" id="articles-container">
+        <!-- Articles will be dynamically loaded here -->
+      </div>
+
+      <footer class="text-white text-center py-3 footer-custom">
+        <p>&copy; 2024 News Today. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      // Fetch messages from the Django backend
+      fetch("{% url 'fetch_messages' %}") // Use Django URL for fetching messages
+        .then((response) => response.json())
+        .then((messages) => {
+          const articlesContainer =
+            document.getElementById("articles-container");
+
+          // Clear loading screen
+          document.getElementById("loading-screen").style.display = "none";
+
+          // If there are messages, create cards for each
+          if (messages.length > 0) {
+            messages.forEach((message) => {
+              const cardHTML = `
+                            <div class="col-md-8 mb-4">
+                                <div class="card article-card">
+                                    <div class="article-media" style="height: 200px; background-color: #f8f9fa;"></div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">${message.title}</h5>
+                                        <p class="card-text">${message.message}</p>
+                                        <div class="reactions text-center">
+                                            <button id="like-button" class="btn btn-outline-custom">👍 Like</button>
+                                            <div id="like-counter" class="like-counter">0 Likes</div>
+                                            <button class="btn">🔁 Share</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+              articlesContainer.innerHTML += cardHTML;
+            });
+          } else {
+            articlesContainer.innerHTML =
+              '<p class="text-white">No news available at the moment.</p>';
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching messages:", error);
+        });
+
+      window.onload = function () {
+        setTimeout(() => {
+          const loadingScreen = document.getElementById("loading-screen");
+          const mainContent = document.getElementById("main-content");
+          loadingScreen.style.display = "none"; // Hide the loading screen
+          mainContent.classList.add("visible"); // Show the main content with fade-in effect
+        }, 2000); // Adjust the delay as needed
+      };
+    </script>
+  </body>
+</html>
